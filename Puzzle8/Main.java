@@ -3,5 +3,6 @@ public class Main {
         Node testObj = new Node();
         testObj.initGame();
         testObj.printState();
+        testObj.createChildren();
     }
 }
