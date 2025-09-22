@@ -6,24 +6,27 @@ import java.util.Random;
 
 public class Node {
     public int[][] gameState;
-    private int seed = 2924234;
+    public int depth;
     public List<Node> childrenNodes = new ArrayList<Node>();
     public Node parentNode;
 
     // Constructor for root node
-    public Node() {
+    public Node(int seed) {
+        this.parentNode = null;
+        this.depth = 0;
         gameState = new int[3][3]; // Creates an empty game state
+        initGame(seed);
     }
 
     // Constructor for child nodes, pass in parent and state of game
-    public Node(Node parent, int[][] state) {
+    public Node(Node parent, int[][] state, int depth) {
         this.parentNode = parent;
         this.gameState = state;
-        printState();
+        this.depth = depth;
     }
 
-    public void initGame() {
-        Integer[] values = { 0, 1, 2, 3, 4, 5, 6, 7, 8 };
+    public void initGame(int seed) {
+        Integer[] values = { 1, 2, 3, 4, 5, 6, 7, 8, 0 };
         int counter = 0;
         Collections.shuffle(Arrays.asList(values), new Random(seed));
         for (int i = 0; i < gameState.length; i++) {
@@ -32,6 +35,21 @@ public class Node {
                 counter++;
             }
         }
+    }
+
+    public String nodeToString(){
+        StringBuilder nodeString = new StringBuilder();
+        for (int[] row : gameState) {
+            for (int positionNumber : row) {
+                nodeString.append(positionNumber);
+            }
+        }
+        return nodeString.toString();
+    }
+
+    //Finds if the current state matches the goal state
+    public boolean isSolution(String solutionState){
+        return this.nodeToString().equals(solutionState);
     }
 
     // Creates children for every viable swap move with the empty space
@@ -43,31 +61,30 @@ public class Node {
             int[][] newState = getCopyOfState();
             newState[emptyRow][emptyCol] = newState[emptyRow - 1][emptyCol];
             newState[emptyRow - 1][emptyCol] = 0;
-            childrenNodes.add(new Node(this, newState));
+            childrenNodes.add(new Node(this, newState, this.depth++));
         }
         // Swap Downwards
         if (!isZeroInBottomRow()) { // Make sure it's allowed to swap
             int[][] newState = getCopyOfState();
             newState[emptyRow][emptyCol] = newState[emptyRow + 1][emptyCol];
             newState[emptyRow + 1][emptyCol] = 0;
-            childrenNodes.add(new Node(this, newState));
+            childrenNodes.add(new Node(this, newState, this.depth++));
         }
         // Swap Left
         if (!isZeroInLeftCol()) { // Make sure it's allowed to swap
             int[][] newState = getCopyOfState();
             newState[emptyRow][emptyCol] = newState[emptyRow][emptyCol - 1];
             newState[emptyRow][emptyCol - 1] = 0;
-            childrenNodes.add(new Node(this, newState));
+            childrenNodes.add(new Node(this, newState, this.depth++));
         }
         // Swap Right
         if (!isZeroInRightCol()) { // Make sure it's allowed to swap
             int[][] newState = getCopyOfState();
-            newState[emptyRow][emptyCol] = newState[emptyRow - 1][emptyCol + 1];
+            newState[emptyRow][emptyCol] = newState[emptyRow][emptyCol + 1];
             newState[emptyRow][emptyCol + 1] = 0;
-            childrenNodes.add(new Node(this, newState));
+            childrenNodes.add(new Node(this, newState, this.depth++));
         }
     }
-
     // Prints the current state of the game in a 3x3 grid
     public void printState() {
         for (int[] row : gameState) {
