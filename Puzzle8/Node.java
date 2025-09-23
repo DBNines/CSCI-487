@@ -7,6 +7,7 @@ import java.util.Random;
 public class Node {
     public int[][] gameState;
     public int depth;
+    public String creationMove;
     public List<Node> childrenNodes = new ArrayList<Node>();
     public Node parentNode;
 
@@ -14,15 +15,17 @@ public class Node {
     public Node(int seed) {
         this.parentNode = null;
         this.depth = 0;
+        this.creationMove = "ROOT";
         gameState = new int[3][3]; // Creates an empty game state
         initGame(seed);
     }
 
     // Constructor for child nodes, pass in parent and state of game
-    public Node(Node parent, int[][] state, int depth) {
+    public Node(Node parent, int[][] state, int depth, String move) {
         this.parentNode = parent;
         this.gameState = state;
         this.depth = depth;
+        this.creationMove = move;
     }
 
     public void initGame(int seed) {
@@ -37,7 +40,7 @@ public class Node {
         }
     }
 
-    public String nodeToString(){
+    public String nodeToString() {
         StringBuilder nodeString = new StringBuilder();
         for (int[] row : gameState) {
             for (int positionNumber : row) {
@@ -47,9 +50,24 @@ public class Node {
         return nodeString.toString();
     }
 
-    //Finds if the current state matches the goal state
-    public boolean isSolution(String solutionState){
+    // Finds if the current state matches the goal state
+    public boolean isSolution(String solutionState) {
         return this.nodeToString().equals(solutionState);
+    }
+
+    // Give a count of how many tiles are NOT where they should be.
+    public int numOfMisplaced(String solutionState) {
+        int misplacedCounter = 0;
+        for (int i = 0; i < solutionState.length(); i++) {
+            if (solutionState.charAt(i) != this.nodeToString().charAt(i)) {
+                misplacedCounter++;
+            }
+        }
+        return misplacedCounter;
+    }
+
+    public int getNodeCost(String solutionState) {
+        return this.depth + this.numOfMisplaced(solutionState);
     }
 
     // Creates children for every viable swap move with the empty space
@@ -61,30 +79,31 @@ public class Node {
             int[][] newState = getCopyOfState();
             newState[emptyRow][emptyCol] = newState[emptyRow - 1][emptyCol];
             newState[emptyRow - 1][emptyCol] = 0;
-            childrenNodes.add(new Node(this, newState, this.depth++));
+            childrenNodes.add(new Node(this, newState, this.depth + 1, "UP"));
         }
         // Swap Downwards
         if (!isZeroInBottomRow()) { // Make sure it's allowed to swap
             int[][] newState = getCopyOfState();
             newState[emptyRow][emptyCol] = newState[emptyRow + 1][emptyCol];
             newState[emptyRow + 1][emptyCol] = 0;
-            childrenNodes.add(new Node(this, newState, this.depth++));
+            childrenNodes.add(new Node(this, newState, this.depth + 1, "DOWN"));
         }
         // Swap Left
         if (!isZeroInLeftCol()) { // Make sure it's allowed to swap
             int[][] newState = getCopyOfState();
             newState[emptyRow][emptyCol] = newState[emptyRow][emptyCol - 1];
             newState[emptyRow][emptyCol - 1] = 0;
-            childrenNodes.add(new Node(this, newState, this.depth++));
+            childrenNodes.add(new Node(this, newState, this.depth + 1, "LEFT"));
         }
         // Swap Right
         if (!isZeroInRightCol()) { // Make sure it's allowed to swap
             int[][] newState = getCopyOfState();
             newState[emptyRow][emptyCol] = newState[emptyRow][emptyCol + 1];
             newState[emptyRow][emptyCol + 1] = 0;
-            childrenNodes.add(new Node(this, newState, this.depth++));
+            childrenNodes.add(new Node(this, newState, this.depth + 1, "RIGHT"));
         }
     }
+
     // Prints the current state of the game in a 3x3 grid
     public void printState() {
         for (int[] row : gameState) {
@@ -93,6 +112,7 @@ public class Node {
             }
             System.out.println('\n' + "------");
         }
+        System.out.println('\n');
     }
 
     // Returns row and column position of where the empty spot in
@@ -158,5 +178,14 @@ public class Node {
             }
         }
         return false;
+    }
+
+    // Prints the path from this node to the parent.
+    public void pathToParent() {
+        // this.printState();
+        System.out.println("MOVE: " + this.creationMove);
+        if (this.parentNode != null) {
+            this.parentNode.pathToParent();
+        }
     }
 }

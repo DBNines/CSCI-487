@@ -4,16 +4,16 @@ import java.util.Queue;
 
 public class Main {
     public static String goalState = "123456780";
-    public static HashSet<String> visitedStates = new HashSet<String>();
+    public static HashSet<String> visitedStates = new HashSet<String>(); //Closed List
     public static int seed = 9;
     public static int nodeCount = 0;
     public static boolean foundSolution = false;
-    public static Queue<Node> fringe = new LinkedList<Node>();
+    public static Queue<Node> fringe = new LinkedList<Node>(); //Open List
     public static void main(String[] args){
         //Create the root node and add it to the fringe
         Node rootNode = new Node(seed);
         fringe.add(rootNode);
-        //rootNode.createChildren();
+        visitedStates.add(rootNode.nodeToString());
         while (!foundSolution){
             nodeCount++;
             if(fringe.size() == 0){ //If the fringe is empty, there are no more nodes to visit. We have failed.
@@ -21,12 +21,12 @@ public class Main {
                 break;
             }
             Node currNode = fringe.remove(); //Examine a node
-            System.out.println("STATS: DEPTH=" + currNode.depth + " Node Count=" + nodeCount);
+            System.out.println("STATS: Depth=" + currNode.depth + " Nodes Expanded=" + nodeCount);
             if(currNode.isSolution(goalState)){ //Check if the node is a solution
                 foundSolution = true;
                 System.out.println("Found solution: Depth= " + currNode.depth);
-                currNode.printState();
-                return;
+                currNode.pathToParent();
+                break;
             }
             currNode.createChildren(); //Create all possible children nodes
             for (Node child: currNode.childrenNodes){ //For every child do
@@ -36,5 +36,7 @@ public class Main {
                 }
             }
         }
+        System.out.println("Inital State was: ");
+        rootNode.printState();
     }
 }
