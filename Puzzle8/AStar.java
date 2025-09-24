@@ -10,11 +10,11 @@ public class AStar {
     // cost) to get a heuristic function.
     public static PriorityQueue<Node> fringe = new PriorityQueue<Node>(
             (Node node1, Node node2) -> Integer.compare(node1.getNodeCost(goalState), node2.getNodeCost(goalState)));
-    public static int seed = 9;
+    public static int seed = 9; // Insert seed here
 
     public static void main(String[] args) {
         Node rootNode = new Node(seed);
-        fringe.add(rootNode);
+        fringe.add(rootNode); //Add root node to fringe
 
         while (fringe.size() != 0) { // While we have nodes to eval
             nodeCount++;
@@ -31,12 +31,10 @@ public class AStar {
             currNode.createChildren(); // Generate all possible child nodes
 
             for (Node child : currNode.childrenNodes) {
-                // Only expand if it's new or a better path
+                // Only expand/add to fringe if child state is new or a better path
                 if (!visitedStates.containsKey(child.nodeToString())
-                        || child.depth < visitedStates.get(child.nodeToString())) { // Go forward if only the closed
-                                                                                    // list does not contain this child
-                    fringe.add(child); // Only add this child if has not been already visited OR it has a better value
-                                       // than the already visited one
+                        || child.depth < visitedStates.get(child.nodeToString())) {                                              
+                    fringe.add(child);               
                 }
             }
         }
